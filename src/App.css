@@ -1,0 +1,213 @@
+/* App Layout */
+.app-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 1.5rem;
+}
+
+.app-header h1 {
+  font-size: 2.5rem;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+main > section {
+  margin-bottom: 3rem;
+}
+
+section h2 {
+  font-size: 1.75rem;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+}
+
+/* 
+==================================================================
+  BUTTON STYLES - THIS IS THE SECTION TO EDIT
+==================================================================
+*/
+
+.btn-primary {
+  /* We use a gradient instead of a solid color */
+  background-image: linear-gradient(45deg, #4f46e5 0%, #3b82f6 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  
+  /* A subtle glow effect using box-shadow */
+  box-shadow: 0 4px 15px rgba(79, 70, 229, 0.2);
+
+  /* Define smooth transitions for all animated properties */
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out, background-image 0.2s ease-out;
+}
+
+.btn-primary:hover {
+  /* Make the button "lift" up slightly on hover */
+  transform: translateY(-3px);
+  
+  /* Intensify the glow on hover */
+  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.3);
+}
+
+.btn-primary:active {
+  /* Make the button "press down" on click */
+  transform: translateY(0px);
+  
+  /* Reduce the glow to simulate being pressed */
+  box-shadow: 0 2px 10px rgba(79, 70, 229, 0.2);
+}
+
+
+/* File Uploader Styles */
+.file-uploader {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  border: 2px dashed var(--border-color);
+  border-radius: 12px;
+  background-color: var(--surface-color);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.file-uploader.dragging {
+  border-color: var(--primary-color);
+  background-color: #2a2a2a;
+}
+
+.file-uploader p {
+  margin: 0.25rem 0;
+  color: var(--text-secondary);
+}
+
+.upload-icon {
+  width: 48px;
+  height: 48px;
+  stroke: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+.upload-cta {
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+.file-name {
+  color: var(--text-primary) !important;
+  font-weight: 500;
+}
+
+/* Project Grid and Card Styles */
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+.project-card {
+  background-color: var(--surface-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid var(--border-color);
+}
+
+.project-title {
+  font-size: 1.25rem;
+  color: var(--text-primary);
+  margin-top: 0;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.scenario-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.scenario-item {
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #2d2d2d;
+}
+
+.scenario-item:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.scenario-description,
+.scenario-outcome {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.scenario-description strong,
+.scenario-outcome strong {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+
+/* ... (keep all the existing styles) ... */
+
+/* File Uploader Styles - UPDATED */
+.file-uploader {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  border: 2px dashed var(--border-color);
+  border-radius: 12px;
+  background-color: var(--surface-color);
+  text-align: center;
+  /* We removed the cursor: pointer from the main div */
+  transition: border-color 0.2s, background-color 0.2s;
+  gap: 1rem; /* ADD THIS: Creates nice spacing between elements */
+}
+
+.file-uploader.dragging {
+  border-color: var(--primary-color);
+  background-color: #2a2a2a;
+}
+
+.file-uploader p {
+  margin: 0; /* UPDATED: a more consistent margin */
+  color: var(--text-secondary);
+}
+
+.upload-icon {
+  width: 48px;
+  height: 48px;
+  stroke: var(--text-secondary);
+  margin-bottom: 0; /* UPDATED: gap handles spacing now */
+}
+
+/* We don't need .upload-cta anymore, but these are still useful */
+.file-name {
+  color: var(--text-primary) !important;
+  font-weight: 500;
+}
+
+
