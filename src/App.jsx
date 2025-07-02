@@ -1,47 +1,21 @@
-import React from 'react';
-import { Toaster } from 'react-hot-toast'; // Import the Toaster
+import React, { useState, useEffect } from 'react';
+import { Toaster, toast } from 'react-hot-toast'; // Import the Toaster and toast function
 import './App.css';
 import FileUploader from './components/FileUploader';
 import ProjectCard from './components/ProjectCard';
+import CreateProjectModal from './components/CreateProjectModal';
+import { Routes, Route, useNavigate } from 'react-router-dom';
+import ProjectPage from './components/ProjectPage';
 
-// Mock data for projects (remains the same)
-const mockProjects = [
-  {
-    id: 1,
-    title: 'E-commerce Checkout Flow',
-    scenarios: [
-      { id: 's1', scenario: 'User adds item to cart', expected_outcome: 'Cart count updates to 1' },
-      { id: 's2', scenario: 'User proceeds to checkout with an empty cart', expected_outcome: 'An error message "Your cart is empty" is displayed' },
-      { id: 's3', scenario: 'User enters an invalid coupon code', expected_outcome: 'An error message "Invalid coupon code" is shown' },
-    ]
-  },
-  {
-    id: 2,
-    title: 'User Authentication Module',
-    scenarios: [
-      { id: 's4', scenario: 'User logs in with correct credentials', expected_outcome: 'User is redirected to the dashboard' },
-      { id: 's5', scenario: 'User attempts login with incorrect password', expected_outcome: '"Invalid username or password" error is displayed' },
-    ]
-  },
-  // ... other projects
-];
-
-function App() {
-
-  const handleDownloadTemplate = () => {
-    const csvContent = "data:text/csv;charset=utf-8,scenario,expected_outcome\n";
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "scenario_template.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
+function MainPage({ projects, filteredProjects, searchTerm, setSearchTerm, loading, error, isModalOpen, setIsModalOpen, handleProjectCreated }) {
+  const navigate = useNavigate();
   return (
     <div className="app-container">
-      {/* Add the Toaster component here and configure its style */}
+      <CreateProjectModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onProjectCreated={handleProjectCreated}
+      />
       <Toaster
         position="top-right"
         toastOptions={{
@@ -67,28 +41,108 @@ function App() {
       
       <header className="app-header">
         <h1>Test Scenario Manager</h1>
-        <button className="btn-primary" onClick={handleDownloadTemplate}>
-          Download CSV Template
-        </button>
+        <div>
+          <button className="btn-primary" onClick={() => setIsModalOpen(true)}>
+            Create New Project
+          </button>
+        </div>
       </header>
 
       <main>
-        <section className="upload-section">
-          <h2>Upload New Scenarios</h2>
-          <FileUploader />
-        </section>
-
         <section className="projects-section">
-          <h2>Existing Projects</h2>
+          <div className="projects-header">
+            <h2>Existing Projects</h2>
+            <input 
+              type="text"
+              placeholder="Filter projects or scenarios..."
+              className="filter-input"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+          {loading && <p>Loading projects...</p>}
+          {error && <p className="error-message">Error: {error}</p>}
+          
           <div className="project-grid">
-            {mockProjects.map(project => (
-              <ProjectCard key={project.id} project={project} />
+            {!loading && !error && projects.map(project => (
+              <ProjectCard key={project.id} project={project} onClick={() => navigate(`/project/${project.id}`)} />
             ))}
           </div>
+          {!loading && !error && projects.length === 0 && (
+            <p>No projects found.</p>
+          )}
         </section>
       </main>
     </div>
   )
+}
+
+function App() {
+  const [projects, setProjects] = useState([]);
+  const [filteredProjects, setFilteredProjects] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/projects');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setProjects(data || []);
+        console.log("Fetched projects:", data);
+      } catch (e) {
+        setError(e.message);
+        toast.error(`Failed to fetch projects: ${e.message}`);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
+
+  useEffect(() => {
+    const lowercasedFilter = searchTerm.toLowerCase();
+    console.log("Projects:", projects);
+    const filtered = projects.filter(project => {
+      const titleMatch = project.title.toLowerCase().includes(lowercasedFilter);
+      const scenarioMatch = Array.isArray(project.scenarios) && project.scenarios.some(scenario => 
+        scenario.Description.toLowerCase().includes(lowercasedFilter)
+      );
+      return titleMatch || scenarioMatch;
+    });
+    setFilteredProjects(filtered);
+    console.log("Filtered projects:", filtered);
+  }, [searchTerm, projects]);
+
+  const handleProjectCreated = (newProject) => {
+    setProjects([newProject, ...projects]);
+  };
+
+  return (
+    <Routes>
+      <Route path="/" element={
+        <MainPage 
+          projects={projects}
+          filteredProjects={filteredProjects}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          loading={loading}
+          error={error}
+          isModalOpen={isModalOpen}
+          setIsModalOpen={setIsModalOpen}
+          handleProjectCreated={handleProjectCreated}
+        />
+      } />
+      <Route path="/project/:id" element={<ProjectPage />} />
+    </Routes>
+  );
 }
 
 export default App
