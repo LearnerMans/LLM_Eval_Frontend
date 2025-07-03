@@ -1,26 +1,116 @@
 import React, { useState, useRef } from 'react';
-import toast from 'react-hot-toast'; // Import the toast function
+import toast from 'react-hot-toast';
+import * as XLSX from 'xlsx';
 import uploadIcon from '../assets/upload-icon.svg';
 
-const FileUploader = () => {
+const REQUIRED_COLUMNS = ['scenario', 'expected_outcome'];
+
+const FileUploader = ({ testId }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [fileName, setFileName] = useState('');
+  const [parsedScenarios, setParsedScenarios] = useState(null);
   const fileInputRef = useRef(null);
 
-  const handleFile = (file) => {
-    if (file && file.type === 'text/csv') {
-      setFileName(file.name);
-      // Trigger a success toast!
-      toast.success(`File "${file.name}" selected successfully!`);
-      // Here you would typically handle the file upload logic
-    } else {
-      // Trigger an error toast!
-      toast.error('Please upload a valid CSV file.');
-      setFileName('');
-    }
+  const validateColumns = (columns) => {
+    return (
+      columns.length === REQUIRED_COLUMNS.length &&
+      REQUIRED_COLUMNS.every((col, idx) => columns[idx].trim() === col)
+    );
   };
 
-  // Drag and drop handlers remain the same
+  const handleDownloadTemplate = () => {
+    const ws = XLSX.utils.aoa_to_sheet([REQUIRED_COLUMNS]);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Template');
+    XLSX.writeFile(wb, 'scenarios_template.xlsx');
+  };
+
+  const handleFile = (file) => {
+    if (!file || !['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'].includes(file.type) && !file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
+      toast.error('Please upload a valid Excel file (.xlsx or .xls)');
+      setFileName('');
+      setParsedScenarios(null);
+      return;
+    }
+    setFileName(file.name);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array', cellText: false, cellDates: true });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const json = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+        if (!json.length) {
+          toast.error('The file is empty.');
+          setFileName('');
+          setParsedScenarios(null);
+          return;
+        }
+        const columns = json[0].map(col => (col || '').toString().trim());
+        if (!validateColumns(columns)) {
+          toast.error('The file must contain only the following columns: scenario, expected_outcome');
+          setFileName('');
+          setParsedScenarios(null);
+          return;
+        }
+        if (json.length <= 1) {
+          toast.error('The file does not contain any scenarios.');
+          setFileName('');
+          setParsedScenarios(null);
+          return;
+        }
+        const scenarios = json.slice(1).map(row => {
+          const obj = {};
+          columns.forEach((col, idx) => {
+            obj[col] = (row[idx] || '').toString();
+          });
+          return obj;
+        });
+        setParsedScenarios(scenarios);
+        toast.success('File is valid and ready to upload!');
+      } catch (err) {
+        toast.error('Invalid file or contains unsupported characters.');
+        setFileName('');
+        setParsedScenarios(null);
+      }
+    };
+    reader.onerror = () => {
+      toast.error('Could not read the file.');
+      setFileName('');
+      setParsedScenarios(null);
+    };
+    reader.readAsArrayBuffer(file);
+  };
+
+  const handleSubmit = () => {
+    if (!parsedScenarios) return;
+    const payload = {
+      test_id: testId,
+      scenarios: parsedScenarios.map(s => ({
+        description: s.scenario,
+        expected_output: s.expected_outcome,
+      })),
+    };
+    fetch('http://localhost:8080/api/upload-scenarios', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.message || 'An error occurred while uploading the file.');
+        }
+        toast.success('Scenarios uploaded successfully!');
+        setFileName('');
+        setParsedScenarios(null);
+      })
+      .catch((err) => {
+        toast.error(err.message || 'An error occurred while uploading the file.');
+      });
+  };
+
   const handleDragEnter = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -54,8 +144,7 @@ const FileUploader = () => {
       handleFile(files[0]);
     }
   };
-  
-  // This function is now called by the new button
+
   const handleButtonClick = () => {
     fileInputRef.current.click();
   };
@@ -67,28 +156,77 @@ const FileUploader = () => {
       onDragLeave={handleDragLeave}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
-      // Note: The main div is no longer clickable
     >
       <input
         type="file"
         ref={fileInputRef}
         onChange={handleFileInputChange}
-        accept=".csv"
+        accept=".xlsx,.xls"
         style={{ display: 'none' }}
       />
       <img src={uploadIcon} alt="Upload" className="upload-icon" />
-      
       {fileName ? (
-        <p className="file-name">Ready to process: {fileName}</p>
+        <div className="file-info">
+          <span className="file-name">
+            <span role="img" aria-label="file" className="file-emoji">📄</span>
+            {fileName}
+          </span>
+          <button
+            className="remove-file-btn"
+            onClick={() => {
+              setFileName('');
+              setParsedScenarios(null);
+              if (fileInputRef.current) fileInputRef.current.value = '';
+            }}
+            title="Remove file"
+            aria-label="Remove file"
+            type="button"
+          >
+            ×
+          </button>
+        </div>
       ) : (
-        <p>Drag and drop a CSV file here</p>
+        <p>Drag and drop an Excel file here or choose a file</p>
       )}
-
-      {/* The new "fancy" button */}
-      <button className="btn-primary" onClick={handleButtonClick}>
-        Or Choose a File
-      </button>
-
+      <div className="file-uploader-actions">
+        <button className="btn-primary" onClick={handleButtonClick}>
+          Or choose a file
+        </button>
+        <button className="btn-secondary" onClick={handleDownloadTemplate}>
+          Download Template
+        </button>
+        <button
+          className="btn-primary"
+          onClick={handleSubmit}
+          disabled={!parsedScenarios || !fileName}
+        >
+          Submit
+        </button>
+      </div>
+      {/* Preview Table */}
+      {parsedScenarios && (
+        <div className="preview-table-wrapper">
+          <h4>Preview:</h4>
+          <table className="preview-table">
+            <thead>
+              <tr>
+                {Object.keys(parsedScenarios[0]).map((col) => (
+                  <th key={col}>{col}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {parsedScenarios.map((row, idx) => (
+                <tr key={idx}>
+                  {Object.values(row).map((val, i) => (
+                    <td key={i}>{val}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 };

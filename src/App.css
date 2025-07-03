@@ -70,6 +70,14 @@ section h2 {
   box-shadow: 0 2px 10px rgba(79, 70, 229, 0.2);
 }
 
+.btn-primary:disabled,
+.btn-primary[disabled] {
+  background-color: #cccccc !important;
+  color: #888888 !important;
+  cursor: not-allowed !important;
+  opacity: 1;
+  border: none;
+}
 
 /* File Uploader Styles */
 .file-uploader {
@@ -615,5 +623,92 @@ section h2 {
   margin: 0 0 0.8em 0;
   font-weight: 400;
   opacity: 1;                       /* Not faded, but still secondary */
+}
+
+/* File Info Styles */
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.file-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+}
+
+.file-emoji {
+  margin-right: 6px;
+  font-size: 1.2em;
+}
+
+.file-uploader-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+/* Preview Table Styles */
+.preview-table-wrapper {
+  margin-top: 2rem;
+  max-height: 300px;
+  overflow: auto;
+  background: var(--surface-color);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  padding: 1rem;
+}
+
+.preview-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--text-primary);
+  background: transparent;
+}
+
+.preview-table th, .preview-table td {
+  border: 1px solid var(--border-color);
+  padding: 8px 10px;
+  text-align: left;
+}
+
+.preview-table th {
+  background: #23272f;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.preview-table td {
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.remove-file-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+  margin-left: 0.5rem;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s;
+}
+
+.remove-file-btn:hover, .remove-file-btn:focus {
+  background: var(--primary-color);
+  color: #fff;
+  outline: none;
 }
 
