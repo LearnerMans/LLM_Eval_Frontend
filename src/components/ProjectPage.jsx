@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import FileUploader from './FileUploader'; // Assuming FileUploader is in the same directory
 import { FiArrowLeft } from 'react-icons/fi';
@@ -21,10 +21,10 @@ const ProjectPage = () => {
   const [testStatus, setTestStatus] = useState(null);
   const [isRunningTest, setIsRunningTest] = useState(false);
   const [statusError, setStatusError] = useState(null);
+  const [runningScenarios, setRunningScenarios] = useState(new Set());
   let pollInterval = null;
 
-  const fetchScenarios = () => {
-    setLoading(true);
+  const fetchScenarios = useCallback(() => {
     setError(null);
     fetch(`http://localhost:8080/api/scenarios/${id}`)
       .then((res) => {
@@ -33,7 +33,6 @@ const ProjectPage = () => {
       })
       .then((data) => {
         setScenarios(data);
-        // If there are no scenarios, default to showing the uploader
         if (data.length === 0) {
           setShowUploader(true);
         }
@@ -43,49 +42,63 @@ const ProjectPage = () => {
         setError(err.message);
         setLoading(false);
       });
-  };
-
-  useEffect(() => {
-    fetchScenarios();
-    // In a real app, you might also fetch project details like the name
   }, [id]);
 
-  // Simulate status changes for demo (replace with real API calls for run/stop/rerun)
+  useEffect(() => {
+    setLoading(true);
+    fetchScenarios();
+  }, [id, fetchScenarios]);
+
   const handleScenarioAction = async (scenario, action) => {
-    console.log(`[RUNNER] Action triggered:`, { scenarioId: scenario.id, action, scenario });
     if (action === 'run' || action === 'rerun') {
+      setRunningScenarios(prev => new Set(prev).add(scenario.id));
+      setScenarios(prevScenarios =>
+        prevScenarios.map(s =>
+          s.id === scenario.id ? { ...s, status: 'Running' } : s
+        )
+      );
       try {
         const res = await fetch(`http://localhost:8080/scenarios/${scenario.id}/run`, { method: 'POST' });
-        if (!res.ok) throw new Error('Failed to start scenario run');
-        const data = await res.json();
-        console.log('[RUNNER][BACKEND]', data);
-        // Optionally refresh scenarios from backend here
-        // fetchScenarios();
-      } catch (err) {
-        console.error('[RUNNER][BACKEND][ERROR]', err);
-        // fallback to local simulation if backend fails
-        setScenarios((prev) =>
-          prev.map((s) => {
-            if (s.id === scenario.id) {
-              return { ...s, status: 'Running' };
-            }
-            return s;
-          })
-        );
-        setTimeout(() => {
-          setScenarios((current) =>
-            current.map((sc) =>
-              sc.id === scenario.id
-                ? { ...sc, status: ['Pass', 'Fail', 'Requires Oversight'][Math.floor(Math.random() * 3)] }
-                : sc
-            )
-          );
+        if (res.status !== 202) {
+          throw new Error('Failed to start scenario run');
+        }
+        const poller = setInterval(() => {
+          fetch(`http://localhost:8080/api/scenarios/${id}`)
+            .then(res => res.json())
+            .then(data => {
+              const updatedScenario = data.find(s => s.id === scenario.id);
+              if (updatedScenario && updatedScenario.status !== 'Running') {
+                setScenarios(data);
+                setRunningScenarios(prev => {
+                  const newSet = new Set(prev);
+                  newSet.delete(scenario.id);
+                  return newSet;
+                });
+                clearInterval(poller);
+              }
+            });
         }, 3000);
+      } catch (err) {
+        setScenarios(prevScenarios =>
+          prevScenarios.map(s =>
+            s.id === scenario.id ? { ...s, status: 'Fail' } : s
+          )
+        );
+        setRunningScenarios(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(scenario.id);
+          return newSet;
+        });
       }
     } else if (action === 'stop') {
-      setScenarios((prev) =>
+      setScenarios(prev =>
         prev.map((s) => (s.id === scenario.id ? { ...s, status: 'Fail' } : s))
       );
+      setRunningScenarios(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(scenario.id);
+        return newSet;
+      });
     }
   };
 
@@ -216,7 +229,11 @@ const ProjectPage = () => {
             ) : error ? (
               <div style={{ color: 'red', margin: '2rem 0' }}>Error: {error}</div>
             ) : (
-              <ScenarioTable scenarios={scenarios} onAction={handleScenarioAction} />
+              <ScenarioTable 
+                scenarios={scenarios} 
+                onAction={handleScenarioAction} 
+                runningScenarios={runningScenarios} 
+              />
             )}
           </section>
         )}

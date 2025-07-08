@@ -21,7 +21,7 @@ const RunningOrb = () => (
   </div>
 );
 
-const ScenarioTable = ({ scenarios, onAction }) => {
+const ScenarioTable = ({ scenarios, onAction, runningScenarios }) => {
   // status color classes
   const getStatusClass = (status) => {
     switch (status) {
@@ -35,12 +35,18 @@ const ScenarioTable = ({ scenarios, onAction }) => {
 
   const renderActionButton = (scenario) => {
     const status = scenario.status;
+    const isRunning = runningScenarios && runningScenarios.has(scenario.id);
     switch (status) {
       case 'Not Run':
       case 'not_run':
         return (
-          <button className="action-btn run" onClick={() => onAction(scenario, 'run')} title="Run Test">
-            <FaPlay size="0.8em" />
+          <button 
+            className="action-btn run" 
+            onClick={() => onAction(scenario, 'run')} 
+            title="Run Test"
+            disabled={isRunning}
+          >
+            {isRunning ? <RunningOrb /> : <FaPlay size="0.8em" />}
           </button>
         );
       case 'Running':
@@ -54,8 +60,13 @@ const ScenarioTable = ({ scenarios, onAction }) => {
       case 'pass':
         return (
           <div className="action-btn-group">
-            <button className="action-btn rerun" onClick={() => onAction(scenario, 'rerun')} title="Rerun Test">
-              <FiRefreshCw />
+            <button 
+              className="action-btn rerun" 
+              onClick={() => onAction(scenario, 'rerun')} 
+              title="Rerun Test"
+              disabled={isRunning}
+            >
+              {isRunning ? <RunningOrb /> : <FiRefreshCw />}
             </button>
           </div>
         );
@@ -66,13 +77,18 @@ const ScenarioTable = ({ scenarios, onAction }) => {
             <button className="action-btn error" title="View Error">
               <MdErrorOutline size={20} />
             </button>
-            <button className="action-btn rerun" onClick={() => onAction(scenario, 'rerun')} title="Rerun Test">
-              <FiRefreshCw />
+            <button 
+              className="action-btn rerun" 
+              onClick={() => onAction(scenario, 'rerun')} 
+              title="Rerun Test"
+              disabled={isRunning}
+            >
+              {isRunning ? <RunningOrb /> : <FiRefreshCw />}
             </button>
           </div>
         );
-      case 'Requires Oversight':
-      case 'requires_oversight':
+      case 'Human_review':
+      case 'human_review':
         return (
           <div className="action-btn-group">
             <button className="action-btn error" title="View Error">
