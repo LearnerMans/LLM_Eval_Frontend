@@ -1,9 +1,8 @@
 import React from 'react';
-import './ScenarioTable.css';
 
 // --- SVG Icon Components ---
-const FaPlay = () => (
-    <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 448 512" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M424.4 214.7L72.4 6.6C43.8-10.3 0 6.1 0 47.9V464c0 37.5 40.7 60.1 72.4 41.3l352-208c31.4-18.5 31.5-64.1 0-82.6z"></path></svg>
+const FaPlay = ({ size = '0.8em' }) => (
+    <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 448 512" height={size} width={size} xmlns="http://www.w3.org/2000/svg"><path d="M424.4 214.7L72.4 6.6C43.8-10.3 0 6.1 0 47.9V464c0 37.5 40.7 60.1 72.4 41.3l352-208c31.4-18.5 31.5-64.1 0-82.6z"></path></svg>
 );
 const FaStop = () => (
     <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 448 512" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M400 32H48C21.5 32 0 53.5 0 80v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V80c0-26.5-21.5-48-48-48z"></path></svg>
@@ -35,32 +34,54 @@ const ScenarioTable = ({ scenarios, onAction }) => {
   };
 
   const renderActionButton = (scenario) => {
-    switch (scenario.status) {
+    const status = scenario.status;
+    switch (status) {
       case 'Not Run':
+      case 'not_run':
         return (
           <button className="action-btn run" onClick={() => onAction(scenario, 'run')} title="Run Test">
-            <FaPlay />
+            <FaPlay size="0.8em" />
           </button>
         );
       case 'Running':
+      case 'running':
         return (
           <button className="action-btn stop" onClick={() => onAction(scenario, 'stop')} title="Stop Test">
             <FaStop />
           </button>
         );
-      default:
+      case 'Pass':
+      case 'pass':
         return (
           <div className="action-btn-group">
-            {(scenario.status === 'Fail' || scenario.status === 'Requires Oversight') && (
-              <button className="action-btn error" title="View Error">
-                <MdErrorOutline size={20} />
-              </button>
-            )}
             <button className="action-btn rerun" onClick={() => onAction(scenario, 'rerun')} title="Rerun Test">
               <FiRefreshCw />
             </button>
           </div>
         );
+      case 'Fail':
+      case 'fail':
+        return (
+          <div className="action-btn-group">
+            <button className="action-btn error" title="View Error">
+              <MdErrorOutline size={20} />
+            </button>
+            <button className="action-btn rerun" onClick={() => onAction(scenario, 'rerun')} title="Rerun Test">
+              <FiRefreshCw />
+            </button>
+          </div>
+        );
+      case 'Requires Oversight':
+      case 'requires_oversight':
+        return (
+          <div className="action-btn-group">
+            <button className="action-btn error" title="View Error">
+              <MdErrorOutline size={20} />
+            </button>
+          </div>
+        );
+      default:
+        return null;
     }
   };
 

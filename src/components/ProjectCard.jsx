@@ -2,7 +2,7 @@ import React from 'react';
 // Import some nice icons
 import { FiBox, FiGitCommit, FiClock, FiMoreVertical, FiTag } from 'react-icons/fi';
 
-const ProjectCard = ({ project, onClick }) => {
+const ProjectCard = ({ project, onClick, onEdit, onDelete }) => {
   // A helper to format the scenario count safely
   const getScenarioCount = () => {
     if (!project.scenarios) return 0;
@@ -60,6 +60,16 @@ const ProjectCard = ({ project, onClick }) => {
         <div className="footer-actions">
            {/* You can add real buttons here later */}
            <button className="btn-secondary btn-small" onClick={e => { e.stopPropagation(); onClick && onClick(); }}>View</button>
+           <button className="btn-secondary btn-small" onClick={e => { e.stopPropagation(); onEdit && onEdit(project); }}>Edit</button>
+           <button 
+             className="btn-secondary btn-small btn-delete"
+             style={{ marginLeft: '1rem', borderColor: '#EF4444', color: '#EF4444' }}
+             onClick={e => { e.stopPropagation(); onDelete && onDelete(project); }}
+             aria-label="Delete project"
+             title="Delete project"
+           >
+             Delete
+           </button>
         </div>
       </div>
     </div>

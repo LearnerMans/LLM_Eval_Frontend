@@ -7,14 +7,16 @@ import CreateProjectModal from './components/CreateProjectModal';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import ProjectPage from './components/ProjectPage';
 
-function MainPage({ projects, filteredProjects, searchTerm, setSearchTerm, loading, error, isModalOpen, setIsModalOpen, handleProjectCreated }) {
+function MainPage({ projects, filteredProjects, searchTerm, setSearchTerm, loading, error, isModalOpen, setIsModalOpen, handleProjectCreated, handleProjectUpdated, handleProjectDeleted, editProject, setEditProject }) {
   const navigate = useNavigate();
   return (
     <div className="app-container">
       <CreateProjectModal 
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => { setIsModalOpen(false); setEditProject(null); }}
         onProjectCreated={handleProjectCreated}
+        onProjectUpdated={handleProjectUpdated}
+        editProject={editProject}
       />
       <Toaster
         position="top-right"
@@ -66,7 +68,24 @@ function MainPage({ projects, filteredProjects, searchTerm, setSearchTerm, loadi
           
           <div className="project-grid">
             {!loading && !error && projects.map(project => (
-              <ProjectCard key={project.id} project={project} onClick={() => navigate(`/project/${project.id}`)} />
+              <ProjectCard 
+                key={project.id} 
+                project={project} 
+                onClick={() => navigate(`/project/${project.id}`)}
+                onEdit={(proj) => { setEditProject(proj); setIsModalOpen(true); }}
+                onDelete={async (proj) => {
+                  if (window.confirm(`Are you sure you want to delete project '${proj.title}'?`)) {
+                    try {
+                      const res = await fetch(`http://localhost:8080/projects/${proj.id}`, { method: 'DELETE' });
+                      if (!res.ok && res.status !== 204) throw new Error('Failed to delete');
+                      handleProjectDeleted(proj.id);
+                      toast.success('Project deleted');
+                    } catch (e) {
+                      toast.error('Delete failed: ' + e.message);
+                    }
+                  }
+                }}
+              />
             ))}
           </div>
           {!loading && !error && projects.length === 0 && (
@@ -85,6 +104,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editProject, setEditProject] = useState(null);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -124,6 +144,13 @@ function App() {
   const handleProjectCreated = (newProject) => {
     setProjects([newProject, ...projects]);
   };
+  const handleProjectUpdated = (updatedProject) => {
+    setProjects(projects.map(p => p.id === updatedProject.id ? updatedProject : p));
+    setEditProject(null);
+  };
+  const handleProjectDeleted = (id) => {
+    setProjects(projects.filter(p => p.id !== id));
+  };
 
   return (
     <Routes>
@@ -138,6 +165,10 @@ function App() {
           isModalOpen={isModalOpen}
           setIsModalOpen={setIsModalOpen}
           handleProjectCreated={handleProjectCreated}
+          handleProjectUpdated={handleProjectUpdated}
+          handleProjectDeleted={handleProjectDeleted}
+          editProject={editProject}
+          setEditProject={setEditProject}
         />
       } />
       <Route path="/project/:id" element={<ProjectPage />} />

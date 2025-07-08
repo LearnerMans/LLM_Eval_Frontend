@@ -5,7 +5,7 @@ import uploadIcon from '../assets/upload-icon.svg';
 
 const REQUIRED_COLUMNS = ['scenario', 'expected_outcome'];
 
-const FileUploader = ({ testId }) => {
+const FileUploader = ({ testId, onUpload }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [fileName, setFileName] = useState('');
   const [parsedScenarios, setParsedScenarios] = useState(null);
@@ -105,6 +105,7 @@ const FileUploader = ({ testId }) => {
         toast.success('Scenarios uploaded successfully!');
         setFileName('');
         setParsedScenarios(null);
+        if (onUpload) onUpload();
       })
       .catch((err) => {
         toast.error(err.message || 'An error occurred while uploading the file.');
