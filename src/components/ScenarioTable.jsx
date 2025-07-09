@@ -29,6 +29,9 @@ const ScenarioTable = ({ scenarios, onAction, runningScenarios }) => {
       case 'Fail': return 'status-fail';
       case 'Requires Oversight': return 'status-oversight';
       case 'Running': return 'status-running';
+      case 'Error':
+      case 'error':
+        return 'status-error';
       default: return 'status-notrun';
     }
   };
@@ -72,6 +75,8 @@ const ScenarioTable = ({ scenarios, onAction, runningScenarios }) => {
         );
       case 'Fail':
       case 'fail':
+      case 'Error':
+      case 'error':
         return (
           <div className="action-btn-group">
             <button className="action-btn error" title="View Error">
@@ -89,6 +94,8 @@ const ScenarioTable = ({ scenarios, onAction, runningScenarios }) => {
         );
       case 'Human_review':
       case 'human_review':
+      case 'Requires Oversight':
+      case 'Human Overview':
         return (
           <div className="action-btn-group">
             <button className="action-btn error" title="View Error">
@@ -122,8 +129,20 @@ const ScenarioTable = ({ scenarios, onAction, runningScenarios }) => {
                 <td>
                   <span className={`status-badge ${getStatusClass(scenario.status)}`}>
                     {scenario.status === 'Running' && <RunningOrb />}
-                    {scenario.status}
+                    {scenario.status === 'Human_review' || scenario.status === 'human_review' ? 'Human Overview' : scenario.status}
+                    {['Error', 'error'].includes(scenario.status) && (
+                      <span className="error-pill" style={{ marginLeft: 8, background: '#e74c3c', color: '#fff', borderRadius: '8px', padding: '2px 8px', fontSize: '0.85em', fontWeight: 500 }}>
+                        Error
+                      </span>
+                    )}
                   </span>
+                  {/* Show error or message if present */}
+                  {scenario.error && (
+                    <div className="scenario-error-message" style={{ color: 'red', fontSize: '0.9em', marginTop: 4 }}>{scenario.error}</div>
+                  )}
+                  {scenario.message && !scenario.error && (
+                    <div className="scenario-message" style={{ color: '#555', fontSize: '0.9em', marginTop: 4 }}>{scenario.message}</div>
+                  )}
                 </td>
                 <td className="actions-col">{renderActionButton(scenario)}</td>
               </tr>

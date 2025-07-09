@@ -4,6 +4,7 @@ import FileUploader from './FileUploader'; // Assuming FileUploader is in the sa
 import { FiArrowLeft } from 'react-icons/fi';
 import { Toaster } from 'react-hot-toast';
 import ScenarioTable from './ScenarioTable';
+import toast from 'react-hot-toast';
 
 // NOTE: The updated CSS file is assumed to be imported here or globally.
 // import '../App.css';
@@ -75,13 +76,16 @@ const ProjectPage = () => {
                   return newSet;
                 });
                 clearInterval(poller);
+                if (updatedScenario.status === 'Error') {
+                  toast.error(`Scenario ${scenario.description} failed to run due to an error.`);
+                }
               }
             });
         }, 3000);
       } catch (err) {
         setScenarios(prevScenarios =>
           prevScenarios.map(s =>
-            s.id === scenario.id ? { ...s, status: 'Fail' } : s
+            s.id === scenario.id ? { ...s, status: 'Error', error: err.message } : s
           )
         );
         setRunningScenarios(prev => {
@@ -89,11 +93,22 @@ const ProjectPage = () => {
           newSet.delete(scenario.id);
           return newSet;
         });
+        toast.error(`Scenario ${scenario.description} failed to run due to an error.`);
       }
     } else if (action === 'stop') {
-      setScenarios(prev =>
-        prev.map((s) => (s.id === scenario.id ? { ...s, status: 'Fail' } : s))
-      );
+      try {
+        const res = await fetch(`http://localhost:8080/scenarios/${scenario.id}/stop`, { method: 'POST' });
+        if (!res.ok) throw new Error('Failed to stop scenario');
+        setScenarios(prev =>
+          prev.map((s) => (s.id === scenario.id ? { ...s, status: 'Error' } : s))
+        );
+        toast.error(`Scenario ${scenario.description} was stopped and marked as Error.`);
+      } catch (err) {
+        setScenarios(prev =>
+          prev.map((s) => (s.id === scenario.id ? { ...s, status: 'Error', error: err.message } : s))
+        );
+        toast.error(`Scenario ${scenario.description} failed to stop: ${err.message}`);
+      }
       setRunningScenarios(prev => {
         const newSet = new Set(prev);
         newSet.delete(scenario.id);
