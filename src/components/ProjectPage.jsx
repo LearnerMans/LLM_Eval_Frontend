@@ -51,6 +51,7 @@ const ProjectPage = () => {
   }, [id, fetchScenarios]);
 
   const handleScenarioAction = async (scenario, action) => {
+    console.log('[SCENARIO ACTION]', { scenario, action, scenarioId: scenario.id }); // LOG ADDED
     if (action === 'run' || action === 'rerun') {
       setRunningScenarios(prev => new Set(prev).add(scenario.id));
       setScenarios(prevScenarios =>
@@ -202,10 +203,10 @@ const ProjectPage = () => {
         of avoiding verbose, label-like text.
       */}
       <header className="project-header">
-        {/* The Project ID is now part of the main heading for better context */}
-        <h1>{projectName}</h1>
-        {/* A subtitle provides context without using a "Label: value" format */}
-        <p>Manage, run, and upload new test scenarios.</p>
+        <h1 style={{ fontWeight: 600, fontSize: '2rem', color: 'var(--text-secondary)', marginBottom: 4 }}>{projectName}</h1>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '1.05rem', marginTop: 0, marginBottom: 24 }}>
+          Review, upload, and run test scenarios for your project.
+        </p>
         <button className="btn-primary" onClick={handleRunTest} disabled={isRunningTest} style={{marginTop: '1rem'}}>
           {isRunningTest ? 'Running Test...' : 'Run Test'}
         </button>
@@ -248,6 +249,7 @@ const ProjectPage = () => {
                 scenarios={scenarios} 
                 onAction={handleScenarioAction} 
                 runningScenarios={runningScenarios} 
+                onScenarioClick={(scenario) => navigate(`/scenario/${scenario.id}`)}
               />
             )}
           </section>

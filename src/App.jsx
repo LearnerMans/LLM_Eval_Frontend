@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Toaster, toast } from 'react-hot-toast'; // Import the Toaster and toast function
 import './App.css';
-import FileUploader from './components/FileUploader';
 import ProjectCard from './components/ProjectCard';
 import CreateProjectModal from './components/CreateProjectModal';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import ProjectPage from './components/ProjectPage';
+import ScenarioRunsPage from './pages/ScenarioRunsPage';
 
 function MainPage({ projects, filteredProjects, searchTerm, setSearchTerm, loading, error, isModalOpen, setIsModalOpen, handleProjectCreated, handleProjectUpdated, handleProjectDeleted, editProject, setEditProject }) {
   const navigate = useNavigate();
@@ -53,7 +53,7 @@ function MainPage({ projects, filteredProjects, searchTerm, setSearchTerm, loadi
       <main>
         <section className="projects-section">
           <div className="projects-header">
-            <h2>Existing Projects</h2>
+            <h2 style={{ color: 'var(--text-secondary)', fontSize: '1.35rem', fontWeight: 500, marginBottom: '1.2rem', letterSpacing: '0.01em' }}>Projects</h2>
             <input 
               type="text"
               placeholder="Filter projects or scenarios..."
@@ -172,6 +172,7 @@ function App() {
         />
       } />
       <Route path="/project/:id" element={<ProjectPage />} />
+      <Route path="/scenario/:scenarioId" element={<ScenarioRunsPage />} />
     </Routes>
   );
 }
