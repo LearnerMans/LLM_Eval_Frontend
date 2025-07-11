@@ -6,6 +6,7 @@ import CreateProjectModal from './components/CreateProjectModal';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import ProjectPage from './components/ProjectPage';
 import ScenarioRunsPage from './pages/ScenarioRunsPage';
+import InteractionsPage from './pages/InteractionsPage';
 
 function MainPage({ projects, filteredProjects, searchTerm, setSearchTerm, loading, error, isModalOpen, setIsModalOpen, handleProjectCreated, handleProjectUpdated, handleProjectDeleted, editProject, setEditProject }) {
   const navigate = useNavigate();
@@ -173,6 +174,7 @@ function App() {
       } />
       <Route path="/project/:id" element={<ProjectPage />} />
       <Route path="/scenario/:scenarioId" element={<ScenarioRunsPage />} />
+      <Route path="/interactions/:runId" element={<InteractionsPage />} />
     </Routes>
   );
 }

@@ -82,31 +82,39 @@ const StatusBadge = ({ status }) => (
 
 const RunCard = ({ run }) => {
   const [showDetails, setShowDetails] = useState(false);
+  const navigate = useNavigate();
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleString();
   };
 
+  // Make the card clickable to go to the interactions page for this run
+  const handleCardClick = () => {
+    navigate(`/interactions/${run.ID || run.id}`);
+  };
+
   return (
-    <div style={{
-      backgroundColor: 'var(--surface)',
-      borderRadius: 'var(--border-radius-lg)',
-      border: '1px solid var(--border)',
-      padding: 'var(--spacing-lg)',
-      boxShadow: 'var(--shadow-card)',
-      transition: 'transform var(--transition-default), box-shadow var(--transition-default)',
-      cursor: 'pointer',
-      position: 'relative',
-    }}
-    onMouseOver={(e) => {
+    <div
+      style={{
+        backgroundColor: 'var(--surface)',
+        borderRadius: 'var(--border-radius-lg)',
+        border: '1px solid var(--border)',
+        padding: 'var(--spacing-lg)',
+        boxShadow: 'var(--shadow-card)',
+        transition: 'transform var(--transition-default), box-shadow var(--transition-default)',
+        cursor: 'pointer',
+        position: 'relative',
+      }}
+      onMouseOver={(e) => {
         e.currentTarget.style.transform = 'translateY(-4px)';
         e.currentTarget.style.boxShadow = '0 12px 30px rgba(0, 0, 0, 0.3)';
-    }}
-    onMouseOut={(e) => {
+      }}
+      onMouseOut={(e) => {
         e.currentTarget.style.transform = 'translateY(0)';
         e.currentTarget.style.boxShadow = 'var(--shadow-card)';
-    }}
+      }}
+      onClick={handleCardClick}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--spacing-md)' }}>
         <div>
@@ -194,7 +202,7 @@ const RunCard = ({ run }) => {
           </button>
 
           {showDetails && (
-            <div style={{ marginTop: 'var(--spacing-md)' }}>
+            <div style={{ marginTop: 'var(--spacing-md)' }} onClick={e => e.stopPropagation()}>
               <p style={{ margin: 0, color: 'var(--text-secondary)', fontStyle: 'italic' }}>
                 "{run.VerdictReasoning}"
               </p>

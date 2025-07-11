@@ -869,3 +869,208 @@ section h2 {
   0% { transform: scale(1); opacity: 0.7; }
   75%, 100% { transform: scale(2); opacity: 0; }
 } 
+
+/* --- Interactions Page Styles --- */
+.interactions-page {
+  background: var(--background, #1A1A1A);
+  min-height: 100vh;
+  color: var(--text-primary, #F0F0F0);
+  font-family: var(--font-family, 'Inter', system-ui, sans-serif);
+  padding: 2rem 0;
+}
+
+.interactions-container {
+  max-width: 1200px; /* was 900px, now wider */
+  margin: 0 auto;
+  padding: 2.5rem 2rem;
+  background: var(--surface-color, #23272f);
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+  border: 1px solid var(--border-color, #232323);
+}
+
+.interactions-header {
+  border-bottom: 1px solid var(--border-color, #232323);
+  margin-bottom: 2rem;
+  padding-bottom: 1.2rem;
+}
+
+.interactions-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-primary, #F0F0F0);
+}
+
+.interactions-subtitle {
+  color: var(--text-secondary, #A0A0A0);
+  font-size: 1.1rem;
+  margin-top: 0.5rem;
+}
+
+.interactions-runid {
+  color: #7fc7ff;
+  font-weight: 500;
+}
+
+.interactions-loading,
+.interactions-error,
+.interactions-empty {
+  text-align: center;
+  font-size: 1.1rem;
+  margin: 2rem 0;
+}
+
+.interactions-error {
+  color: #ff7f7f;
+}
+
+.interactions-empty {
+  color: var(--text-secondary, #A0A0A0);
+}
+
+/* --- Interaction Card --- */
+.interaction-card {
+  background: var(--surface-color, #121212);
+  border: 1px solid var(--border-color, #232323);
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  padding: 2.5rem 2rem; /* increased padding for width */
+  transition: border-color 0.2s, box-shadow 0.2s;
+  width: 100%;
+  box-sizing: border-box;
+}
+.interaction-card:hover {
+  border-color: #4f46e5;
+  box-shadow: 0 4px 20px rgba(79,70,229,0.10);
+}
+
+.interaction-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.interaction-turn {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-primary, #F0F0F0);
+}
+
+.interaction-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.interaction-message {
+  background: #1A1A1A;
+  border-radius: 8px;
+  padding: 1rem 1.2rem;
+  border: 1px solid transparent;
+  display: flex;
+  align-items: flex-start;
+}
+
+.interaction-message.tester {
+  border-left: 4px solid #3b82f6;
+}
+.interaction-message.tested {
+  border-left: 4px solid #a855f7;
+}
+
+.interaction-icon-text {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.icon {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  color: var(--text-secondary, #A0A0A0);
+}
+.tester-icon {
+  color: #3b82f6;
+}
+.tested-icon {
+  color: #a855f7;
+}
+
+.interaction-message-content {
+  flex: 1;
+}
+
+.interaction-role {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-secondary, #A0A0A0);
+  margin-bottom: 0.5rem;
+}
+
+.interaction-text {
+  color: var(--text-primary, #F0F0F0);
+  font-size: 1.18rem;
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+/* --- Reasoning Section --- */
+.interaction-reasoning-section {
+  margin-top: 1.5rem;
+  border-top: 1px solid var(--border-color, #232323);
+  padding-top: 1.2rem;
+}
+
+.interaction-reasoning-title {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-secondary, #A0A0A0);
+  margin-bottom: 0.5rem;
+}
+
+.interaction-reasoning-toggle {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  transition: background 0.2s, color 0.2s;
+}
+.interaction-reasoning-toggle:hover {
+  background: #232323;
+  color: #4f46e5;
+}
+
+.interaction-reasoning-box {
+  background: #23272f;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 0.5rem;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.interaction-reasoning-text {
+  color: var(--text-primary, #F0F0F0);
+  font-size: 0.98rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.arrow {
+  font-size: 1.1em;
+  margin-left: 0.3em;
+} 
