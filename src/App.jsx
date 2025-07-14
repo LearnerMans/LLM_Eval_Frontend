@@ -132,9 +132,9 @@ function App() {
     const lowercasedFilter = searchTerm.toLowerCase();
     console.log("Projects:", projects);
     const filtered = projects.filter(project => {
-      const titleMatch = project.title.toLowerCase().includes(lowercasedFilter);
+      const titleMatch = typeof project.title === 'string' && project.title.toLowerCase().includes(lowercasedFilter);
       const scenarioMatch = Array.isArray(project.scenarios) && project.scenarios.some(scenario => 
-        scenario.Description.toLowerCase().includes(lowercasedFilter)
+        typeof scenario.Description === 'string' && scenario.Description.toLowerCase().includes(lowercasedFilter)
       );
       return titleMatch || scenarioMatch;
     });
